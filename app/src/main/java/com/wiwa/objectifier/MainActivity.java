@@ -98,7 +98,7 @@ public class MainActivity extends ActionBarActivity {
                 catch (Exception e){
                     e.printStackTrace();
                 }
-                /*
+
                 String downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
 
                 File f = new File(downloads + "/fordaryl1");
@@ -122,7 +122,7 @@ public class MainActivity extends ActionBarActivity {
                 else{
                     Toast.makeText(MainActivity.this, "Nopies.", Toast.LENGTH_SHORT).show();
                 }
-                */
+
             }
         });
     }
@@ -181,7 +181,7 @@ public class MainActivity extends ActionBarActivity {
                 OutputStream outStream = new FileOutputStream(targetFile);
                 outStream.write(buffer);
 
-                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.wiwa.objectify");
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.winwang.objectify");
                 startActivity(launchIntent);
             }
 
