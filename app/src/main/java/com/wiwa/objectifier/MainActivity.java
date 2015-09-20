@@ -135,7 +135,6 @@ public class MainActivity extends ActionBarActivity {
                 HttpClient client = new DefaultHttpClient();
                 HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
                 HttpResponse response;
-                JSONObject json = new JSONObject();
 
                 try {
                     HttpPost post = new HttpPost(uri);
