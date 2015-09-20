@@ -2,6 +2,7 @@ package com.wiwa.objectifier;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Environment;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
@@ -179,6 +180,9 @@ public class MainActivity extends ActionBarActivity {
                 File targetFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
                 OutputStream outStream = new FileOutputStream(targetFile);
                 outStream.write(buffer);
+
+                Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.wiwa.objectify");
+                startActivity(launchIntent);
             }
 
         } catch(Exception e) {
