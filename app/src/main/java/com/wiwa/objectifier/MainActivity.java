@@ -131,33 +131,51 @@ public class MainActivity extends ActionBarActivity {
         Thread t = new Thread() {
 
             public void run() {
-                Looper.prepare(); //For Preparing Message Pool for the child Thread
+                //Looper.prepare(); //For Preparing Message Pool for the child Thread
                 HttpClient client = new DefaultHttpClient();
                 HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
                 HttpResponse response;
 
+                for(int i = 0; i < 50; i++){
+
+                    Log.d("POSTED", "asdfasdfTRYINGGG?");
+                }
+
                 try {
+
+                    for(int i = 0; i < 50; i++){
+
+                        Log.d("POSTED", "TRYINGGG?");
+                    }
                     HttpPost post = new HttpPost(uri);
                     StringEntity se = new StringEntity( json.toString());
                     se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
                     post.setEntity(se);
                     response = client.execute(post);
+                    for(int i = 0; i < 15; i++){
 
+                        Log.d("POSTED", "RESP?");
+                    }
                 /*Checking response */
                     if(response!=null){
+                        Log.d("POSTEDD", "YISSS");
                         InputStream in = response.getEntity().getContent(); //Get the data in the entity
                     }
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
 
-                Looper.loop(); //Loop in the message queue
+                //Looper.loop(); //Loop in the message queue
             }
         };
 
         t.start();
     }
     protected void getThings(final URI uri) {
+
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.winwang.objectify");
+        startActivity(launchIntent);
+        /*
         HttpClient client = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
         HttpResponse response;
@@ -170,7 +188,7 @@ public class MainActivity extends ActionBarActivity {
             se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
             response = client.execute(get);
 
-                    /*Checking response */
+                    //Checking response
             if(response!=null){
                 InputStream in = response.getEntity().getContent(); //Get the data in the entity
                 byte[] buffer = new byte[in.available()];
@@ -186,7 +204,7 @@ public class MainActivity extends ActionBarActivity {
 
         } catch(Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override
