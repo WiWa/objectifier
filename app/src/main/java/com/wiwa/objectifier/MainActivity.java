@@ -18,6 +18,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
@@ -30,8 +31,10 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
@@ -88,6 +91,13 @@ public class MainActivity extends ActionBarActivity {
         viewModelBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try{
+                    getThings(new URI("http://45.55.46.216:9000"));
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                /*
                 String downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
 
                 File f = new File(downloads + "/fordaryl1");
@@ -111,6 +121,7 @@ public class MainActivity extends ActionBarActivity {
                 else{
                     Toast.makeText(MainActivity.this, "Nopies.", Toast.LENGTH_SHORT).show();
                 }
+                */
             }
         });
     }
@@ -132,11 +143,10 @@ public class MainActivity extends ActionBarActivity {
                     post.setEntity(se);
                     response = client.execute(post);
 
-                    /*Checking response */
+                /*Checking response */
                     if(response!=null){
                         InputStream in = response.getEntity().getContent(); //Get the data in the entity
                     }
-
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
@@ -146,6 +156,34 @@ public class MainActivity extends ActionBarActivity {
         };
 
         t.start();
+    }
+    protected void getThings(final URI uri) {
+        HttpClient client = new DefaultHttpClient();
+        HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
+        HttpResponse response;
+        JSONObject json = new JSONObject();
+
+        try {
+
+            HttpGet get = new HttpGet(uri);
+            StringEntity se = new StringEntity( json.toString());
+            se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+            response = client.execute(get);
+
+                    /*Checking response */
+            if(response!=null){
+                InputStream in = response.getEntity().getContent(); //Get the data in the entity
+                byte[] buffer = new byte[in.available()];
+                in.read(buffer);
+
+                File targetFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
+                OutputStream outStream = new FileOutputStream(targetFile);
+                outStream.write(buffer);
+            }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
