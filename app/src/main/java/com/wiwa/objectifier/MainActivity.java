@@ -3,10 +3,12 @@ package com.wiwa.objectifier;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -21,12 +24,16 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.entity.mime.*;
 import org.apache.http.entity.*;
 import org.json.JSONObject;
 
@@ -39,6 +46,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
@@ -73,13 +81,19 @@ public class MainActivity extends ActionBarActivity {
                         byte[] data = new byte[(int) img.length()];
                         try {
                             new FileInputStream(img).read(data);
-                            rest_json.put(img.getName(), data);
+                            String encoded = Base64.encodeToString(data, Base64.DEFAULT);
+                            rest_json.put(img.getName(), encoded);
 
-                            sendJson(new URI("http://45.55.46.216:9000"), rest_json);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
+                }
+                try{
+                    sendJson(new URI("http://45.55.46.216:9000"), rest_json);
+                }
+                catch (Exception e){
+
                 }
                 if(filename != null){
                     Toast.makeText(MainActivity.this, "Doing the thing: " + filename, Toast.LENGTH_SHORT).show();
@@ -127,55 +141,54 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
-    protected void sendJson(final URI uri, final JSONObject json) {
-        Thread t = new Thread() {
+    private class DownloadFilesTask extends AsyncTask<Object, Void, Void>{
+        @Override
+        protected Void doInBackground(Object... objects) {
+            URI uri = (URI) objects[0];
+            JSONObject json = (JSONObject) objects[1];
+            HttpClient client = new DefaultHttpClient();
+            HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
+            HttpResponse response;
 
-            public void run() {
-                //Looper.prepare(); //For Preparing Message Pool for the child Thread
-                HttpClient client = new DefaultHttpClient();
-                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-                HttpResponse response;
+            try {
 
-                for(int i = 0; i < 50; i++){
+                HttpPost post = new HttpPost(uri);
+                StringEntity se = new StringEntity( json.toString());
+                se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
+                post.setEntity(se);
+                response = client.execute(post);
 
-                    Log.d("POSTED", "asdfasdfTRYINGGG?");
+                MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+                Iterator<String> iter = json.keys();
+                String k;
+                while(iter.hasNext()){
+                    k = iter.next();
+                    entity.addPart(k, new StringBody((String) json.get(k)));
                 }
+                HttpPost httpPost = new HttpPost(uri);
+                httpPost.setEntity(entity);
+                response = client.execute(httpPost);
+                HttpEntity result = response.getEntity();
 
-                try {
-
-                    for(int i = 0; i < 50; i++){
-
-                        Log.d("POSTED", "TRYINGGG?");
-                    }
-                    HttpPost post = new HttpPost(uri);
-                    StringEntity se = new StringEntity( json.toString());
-                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-                    post.setEntity(se);
-                    response = client.execute(post);
-                    for(int i = 0; i < 15; i++){
-
-                        Log.d("POSTED", "RESP?");
-                    }
                 /*Checking response */
-                    if(response!=null){
-                        Log.d("POSTEDD", "YISSS");
-                        InputStream in = response.getEntity().getContent(); //Get the data in the entity
-                    }
-                } catch(Exception e) {
-                    e.printStackTrace();
+                if(response!=null){
+                    InputStream in = response.getEntity().getContent(); //Get the data in the entity
                 }
-
-                //Looper.loop(); //Loop in the message queue
+            } catch(Exception e) {
+                e.printStackTrace();
             }
-        };
+            return null;
+        }
+    }
 
-        t.start();
+    protected void sendJson(final URI uri, final JSONObject json) {
+
+        // to start it
+        new DownloadFilesTask().execute(uri, json);
+
     }
     protected void getThings(final URI uri) {
 
-        Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.winwang.objectify");
-        startActivity(launchIntent);
-        /*
         HttpClient client = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
         HttpResponse response;
@@ -204,7 +217,7 @@ public class MainActivity extends ActionBarActivity {
 
         } catch(Exception e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
     @Override
