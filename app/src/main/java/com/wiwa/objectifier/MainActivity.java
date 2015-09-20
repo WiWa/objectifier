@@ -177,7 +177,7 @@ public class MainActivity extends ActionBarActivity {
                 byte[] buffer = new byte[in.available()];
                 in.read(buffer);
 
-                File targetFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString());
+                File targetFile = new File("/Android/data/com.winwang.objectify/files/teapots.obj");
                 OutputStream outStream = new FileOutputStream(targetFile);
                 outStream.write(buffer);
 
